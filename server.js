@@ -3,17 +3,23 @@ const path = require('path')
 const socketIO = require('socket.io');
 const PORT = process.env.PORT || 5000
 const fetch = require('node-fetch');
+const cors = require("cors");
 
 // start the express server with the appropriate routes for our webhook and web requests
 var app = express()
   .use(express.static(path.join(__dirname, 'public')))
   .use(express.json())
+  .use(cors())
   .post('/alchemyhook', (req, res) => { notificationReceived(req); res.status(200).end() })
-  .get('/*', (req, res) => res.sendFile(path.join(__dirname + '/index.html')))
   .listen(PORT, () => console.log(`Listening on ${PORT}`))
 
 // start the websocket server
-const io = socketIO(app);
+const io = socketIO(app,{
+   cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
 
 // listen for client connections/calls on the WebSocket server
 io.on('connection', (socket) => {
